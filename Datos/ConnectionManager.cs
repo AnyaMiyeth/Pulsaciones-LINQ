@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oracle.ManagedDataAccess.Client;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -14,7 +15,7 @@ namespace Datos
 
         public ConnectionManager(string connectionString)
         {
-            Connection = new SqlConnection(connectionString);
+            Connection = new OracleConnection(connectionString);
         }
 
         public void Open()

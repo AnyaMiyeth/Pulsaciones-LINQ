@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace PresentacionGUI
 {
-    public partial class FrmRegistroPersona : Form
+    public partial class FrmRegistroPersona : Form,IReceptor
     {
         PersonaService personaService;
         
@@ -36,7 +36,7 @@ namespace PresentacionGUI
 
         private Persona MapearPersona()
         {
-            Persona persona = new Persona();
+            Persona persona = new Mujer();
             persona.Identificacion = txtIdentificacion.Text;
             persona.Nombre = txtNombre.Text;
             persona.Sexo = cmbSexo.Text;
@@ -60,6 +60,33 @@ namespace PresentacionGUI
             cmbSexo.Text = "";
             txtPulsacion.Text = "";
             btnGuardar.Enabled = false;
+        }
+
+       
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FrmConsultaPersona frmConsulta = new FrmConsultaPersona(this);
+            frmConsulta.Show();
+        }
+
+        
+
+        private void FrmRegistroPersona_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        public void Recibir(Persona persona)
+        {
+            if (persona!=null)
+            {
+                txtIdentificacion.Text = persona.Identificacion;
+                txtNombre.Text = persona.Nombre;
+                txtEdad.Text = persona.Edad.ToString();
+                cmbSexo.Text = persona.Sexo;
+                txtPulsacion.Text = persona.Pulsacion.ToString();
+            }
         }
     }
 }

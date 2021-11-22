@@ -3,6 +3,7 @@ using Logica;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 namespace PresentacionGUI
 {
@@ -10,14 +11,26 @@ namespace PresentacionGUI
     public partial class FrmConsultaPersona : Form
     {
         private PersonaService personaService;
+        IReceptor _receptor;
        
-
         public FrmConsultaPersona()
+        {
+            InicializacionFormulario();
+        }
+
+        public FrmConsultaPersona(IReceptor receptor)
+        {
+            _receptor = receptor;
+
+            InicializacionFormulario();
+        }
+
+
+        private void InicializacionFormulario()
         {
             InitializeComponent();
             personaService = new PersonaService(ConfigConnectionString.ConnectionString);
-            ConfiguraionInicalGrid();
-
+            //ConfiguraionInicalGrid();
         }
 
         private void btnConsultar_Click(object sender, EventArgs e)
@@ -53,7 +66,7 @@ namespace PresentacionGUI
             }
             else
             {
-                LlenarGrid(respuetsa.Personas);
+                LlenarGridConDataSource(respuetsa.Personas);
             }
         }
 
@@ -76,15 +89,20 @@ namespace PresentacionGUI
             }
         }
 
-        public void LlenarGrid(List<Persona> personas)
+        public void LlenarGridConDataSource(List<Persona> personas)
+        {
+            dgvPersonas.DataSource = null;
+            dgvPersonas.DataSource = personas;
+        }
+        public void LlenarGridMapeandoCeldas(List<Persona> personas)
         {
             dgvPersonas.Rows.Clear();
-          
-                foreach (var item in personas)
-                {
-                    dgvPersonas.Rows.Add(item.Identificacion, item.Nombre, item.Edad, item.Sexo, item.Pulsacion);
-                }
-       
+        
+            foreach (var item in personas)
+            {
+                dgvPersonas.Rows.Add(item.Identificacion, item.Nombre, item.Edad, item.Sexo, item.Pulsacion);
+            }
+
             dgvPersonas.Refresh();
 
 
@@ -93,11 +111,11 @@ namespace PresentacionGUI
         private void ConfiguraionInicalGrid()
         {
             dgvPersonas.AllowUserToAddRows = false;
-            dgvPersonas.Columns.Add("columNombre", "Identificacion");
-            dgvPersonas.Columns.Add("columNombre", "Nombre");
-            dgvPersonas.Columns.Add("columEdad", "Edad");
-            dgvPersonas.Columns.Add("columSexo", "Sexo");
-            dgvPersonas.Columns.Add("columPulsacion", "Pulsacion");
+            dgvPersonas.Columns.Add("Identificacion", "Identificacion");
+            dgvPersonas.Columns.Add("Nombre", "Nombre");
+            dgvPersonas.Columns.Add("Edad", "Edad");
+            dgvPersonas.Columns.Add("Sexo", "Sexo");
+            dgvPersonas.Columns.Add("Pulsacion", "Pulsacion");
 
             dgvPersonas.ColumnHeadersDefaultCellStyle.BackColor = Color.Navy;
             dgvPersonas.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
@@ -116,5 +134,16 @@ namespace PresentacionGUI
            
 
         }
+
+        private void dgvPersonas_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (_receptor!=null)
+            {
+                Persona persona = dgvPersonas.CurrentRow.DataBoundItem as Persona;
+                 _receptor.Recibir(persona);
+
+            }
+        }
+               
     }
 }

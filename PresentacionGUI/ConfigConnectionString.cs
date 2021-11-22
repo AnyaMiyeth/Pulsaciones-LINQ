@@ -8,6 +8,6 @@ namespace PresentacionGUI
 {
    public static class ConfigConnectionString
     {
-        public static string ConnectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        public static string ConnectionString = ConfigurationManager.ConnectionStrings["Oracle"].ConnectionString;
     }
 }

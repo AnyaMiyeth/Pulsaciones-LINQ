@@ -1,6 +1,8 @@
 ﻿using Entidad;
+using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
@@ -22,14 +24,15 @@ namespace Datos
         {
             using (var command = _connection.CreateCommand())
             {
-                command.CommandText = "insert into persona (Identificacion, Edad, Pulsacion , sexo, Nombre) values (@Identificacion, @Edad, @Pulsacion, @Sexo, @Nombre )";
-                command.Parameters.Add(new SqlParameter("@Identificacion", persona.Identificacion));
-                command.Parameters.Add(new SqlParameter("@Edad", persona.Edad));
-                command.Parameters.Add(new SqlParameter("@Pulsacion", persona.Pulsacion));
-                command.Parameters.Add(new SqlParameter("@Sexo", persona.Sexo));
-                command.Parameters.Add(new SqlParameter("@Nombre", persona.Nombre));
+                //command.CommandText = "insert into persona (Identificacion, Edad, Pulsacion , sexo, Nombre) values (@Identificacion, @Edad, @Pulsacion, @Sexo, @Nombre )";
+                command.CommandText = $"insert into persona (Identificacion, Edad, Pulsacion , sexo, Nombre) values ('{persona.Identificacion}', {persona.Edad}, {persona.Pulsacion}, '{persona.Sexo}', '{persona.Nombre}')";
+                //command.Parameters.Add(new SqlParameter("@Identificacion", persona.Identificacion));
+                //command.Parameters.Add(new SqlParameter("@Edad", persona.Edad));
+                //command.Parameters.Add(new SqlParameter("@Pulsacion", persona.Pulsacion));
+                //command.Parameters.Add(new SqlParameter("@Sexo", persona.Sexo));
+                //command.Parameters.Add(new SqlParameter("@Nombre", persona.Nombre));
                 int fila=command.ExecuteNonQuery();
-               
+
             }
         }
         public List<Persona> Consultar()
@@ -80,25 +83,31 @@ namespace Datos
 
         public void Modificar(Persona personaNuevo, string identificacion)
         {
-            using (var command = _connection.CreateCommand())
+            using (var transaction = _connection.BeginTransaction())
             {
-                command.CommandText = "update persona set Nombre=@Nombre, Edad=@Edad,Sexo=@Sexo, pulsacion=@Pulsacion where Identificacion=@Identificacion";
-                command.Parameters.Add(new SqlParameter("@Identificacion", identificacion));
-                command.Parameters.Add(new SqlParameter("@Edad", personaNuevo.Edad));
-                command.Parameters.Add(new SqlParameter("@Pulsacion", personaNuevo.Pulsacion));
-                command.Parameters.Add(new SqlParameter("@Sexo", personaNuevo.Sexo));
-                command.Parameters.Add(new SqlParameter("@Nombre", personaNuevo.Nombre));
-                int fila = command.ExecuteNonQuery();
-
-            }
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "update persona set Nombre=@Nombre, Edad=@Edad,Sexo=@Sexo, pulsacion=@Pulsacion where Identificacion=@Identificacion";
+                    command.Parameters.Add(new SqlParameter("@Identificacion", identificacion));
+                    command.Parameters.Add(new SqlParameter("@Edad", personaNuevo.Edad));
+                    command.Parameters.Add(new SqlParameter("@Pulsacion", personaNuevo.Pulsacion));
+                    command.Parameters.Add(new SqlParameter("@Sexo", personaNuevo.Sexo));
+                    command.Parameters.Add(new SqlParameter("@Nombre", personaNuevo.Nombre));
+                    int fila = command.ExecuteNonQuery();
+                    transaction.Commit();
+                }
+            } 
         }
 
         public Persona BuscarPorIdentificacion(string identificacion)
         {
+           
             using (var command = _connection.CreateCommand())
             {
-                command.CommandText = "select * from persona where Identificacion=@Identificaion";
-                command.Parameters.Add(new SqlParameter("@Identificacion", identificacion));
+                command.CreateParameter();
+                command.CommandText = "select * from persona where Identificacion=:Identificacion";
+                //command.Parameters.Add(new OracleParameter(":identificacion",identificacion));
+                CreateParameter(command, "identificacion", identificacion);
                 var reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
@@ -116,6 +125,14 @@ namespace Datos
                 reader.Close();
             }
             return null;
+        }
+
+        public void CreateParameter(DbCommand command, string parameterName, object value)
+        {
+            DbParameter paramametro = command.CreateParameter();
+            paramametro.ParameterName = parameterName;
+            paramametro.Value = value;
+            command.Parameters.Add(paramametro);
         }
 
         public List<Persona> FiltrarPorSexo(string sexo)

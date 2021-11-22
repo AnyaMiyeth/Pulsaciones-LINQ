@@ -51,8 +51,10 @@ namespace PresentacionGUI
             this.dgvPersonas.Name = "dgvPersonas";
             this.dgvPersonas.RowHeadersWidth = 102;
             this.dgvPersonas.RowTemplate.Height = 40;
-            this.dgvPersonas.Size = new System.Drawing.Size(1975, 200);
+            this.dgvPersonas.Size = new System.Drawing.Size(1975, 697);
             this.dgvPersonas.TabIndex = 0;
+           // this.dgvPersonas.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPersonas_CellContentClick);
+            this.dgvPersonas.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPersonas_CellDoubleClick);
             // 
             // btnConsultar
             // 
